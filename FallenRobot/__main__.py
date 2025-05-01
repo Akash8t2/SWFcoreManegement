@@ -22,7 +22,7 @@ from telegram.ext import (
     Filters,
     MessageHandler,
 )
-from telegram.ext.dispatcher import DispatcherHandlerStop, run_async
+from telegram.ext.dispatcher import DispatcherHandlerStop
 from telegram.utils.helpers import escape_markdown
 from telethon import __version__ as tlhver
 
@@ -72,47 +72,42 @@ def get_readable_time(seconds: int) -> str:
 
 
 PM_START_TEXT = """
-*Êœá´‡Ê* {}, ðŸ¥€
+*ʜᴇʏ* {}, 🥀
 
-*à¹ á´›ÊœÉªs Éªs* {} !
-âž»ð— ð—˜ ð—Ÿð—”ð——ð—žð—œ ð—žð—œ ð—Ÿð—¢ð—¬ð—˜ð—Ÿð—œð—§ð—¬ ð—žð—œ ð—žð—”ð—¦ð— ð—¢ ð—žð—¢ ð—”ð—ªð—¥ ð—¦ð—œð—šð—¥ð—”ð—§ð—˜ ð—žð—œ ð—£ð—”ð—–ð—žð—˜ð—§ ð—£ð—”ð—¥ ð—Ÿð—œð—žð—›ð—œ ð—›ð—¨ð—¬ð—œ 
-ð—ªð—”ð—¥ð—¡ð—œð—¡ð—š ð—žð—¢ ð——ð—¢ð—¡ð—¢ . ð—žð—¢ ð—¦ð—˜ð—¥ð—œð—¢ð—¨ð—¦ ð—¡ð—”ð—›ð—œ ð—Ÿð—˜ð—§ð—”  ðŸ‘‘â¤ï¸ðŸ’£
+*๏ ᴛʜɪs ɪs* {} !
+➻ ᴛʜᴇ ᴍᴏsᴛ ᴩᴏᴡᴇʀғᴜʟ ᴛᴇʟᴇɢʀᴀᴍ ɢʀᴏᴜᴩ ᴍᴀɴᴀɢᴇᴍᴇɴᴛ ʙᴏᴛ ᴡɪᴛʜ sᴏᴍᴇ ᴀᴡᴇsᴏᴍᴇ ᴀɴᴅ ᴜsᴇғᴜʟ ғᴇᴀᴛᴜʀᴇs.
 
-Â´ï½¥á´—ï½¥` ð—”ð—”ð—• ð—›ð—”ð—  ð—žð—›ð—¨ð——ð—£ð—”ð—¥ ð—™ð—›ð—œð——ð—” ð—›ð—˜ 
-ð—§ð—¨ð— ð—›ð—”ð—¥ð—” ð—›ð—¨ð—¦ð—¡ ð—”ð—”ð—• ð—•ð—›ð—”ð—”ð—— ð— ð—˜ ð—ð—”ð—¬ð—˜
-*à¹ á´ŠÉªsá´‹á´‡ á´Šá´€ÉªÊ™ á´á´‡ É¢á´€É´á´…ÊœÉª  á´„Êœá´Ê€Éª á´œsá´‹á´‡ á´˜Êá´€á´€Ê€ á´á´‡ á´€á´€É´á´…ÊœÉª ðŸ–¤*
+──────────────────
+*๏ ᴄʟɪᴄᴋ ᴏɴ ᴛʜᴇ ʜᴇʟᴩ ʙᴜᴛᴛᴏɴ ᴛᴏ ɢᴇᴛ ɪɴғᴏʀᴍᴀᴛɪᴏɴ ᴀʙᴏᴜᴛ ᴍʏ ᴍᴏᴅᴜʟᴇs ᴀɴᴅ ᴄᴏᴍᴍᴀɴᴅs.*
 """
-
-# Escape special markdown characters
-escaped_text = escape_markdown(PM_START_TEXT, version=2)
 
 buttons = [
     [
         InlineKeyboardButton(
-            text="âœ¨â£ï¸á´€á´…á´… Êá´á´œÊ€ É¢Ê€á´˜ Ê€á´€á´…Êœá´‡ Ê€á´€á´…Êœá´‡ â£ï¸âœ¨",
+            text="ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ɢʀᴏᴜᴘ",
             url=f"https://t.me/{BOT_USERNAME}?startgroup=true",
         ),
     ],
     [
-        InlineKeyboardButton(text="Êœá´‡ÊŸá´© & á´„á´á´á´á´€É´á´…s", callback_data="help_back"),
+        InlineKeyboardButton(text="ʜᴇʟᴩ & ᴄᴏᴍᴍᴀɴᴅs", callback_data="help_back"),
     ],
     [
-        InlineKeyboardButton(text="âœ¨â£ï¸ á´€Ê™á´á´œá´› â£ï¸âœ¨", callback_data="fallen_"),
-        InlineKeyboardButton(text="âœ¨â£ï¸ sá´œá´©á´©á´Ê€á´› â£ï¸âœ¨", url=f"https://t.me/{SUPPORT_CHAT}"),
+        InlineKeyboardButton(text="❄ ᴀʙᴏᴜᴛ ❄", callback_data="fallen_"),
+        InlineKeyboardButton(text="✨ sᴜᴩᴩᴏʀᴛ ✨", url=f"https://t.me/{SUPPORT_CHAT}"),
     ],
     [
-        InlineKeyboardButton(text="âœ¨â£ï¸ á´…á´‡á´ á´‡ÊŸá´á´©á´‡Ê€ â£ï¸âœ¨", url=f"tg://user?id={OWNER_ID}"),
-        InlineKeyboardButton(text="âœ¨â£ï¸ sá´á´œÊ€á´„á´‡ â£ï¸âœ¨", callback_data="source_"),
+        InlineKeyboardButton(text="🥀 ᴅᴇᴠᴇʟᴏᴩᴇʀ 🥀", url=f"tg://user?id={OWNER_ID}"),
+        InlineKeyboardButton(text="☁️ sᴏᴜʀᴄᴇ ☁️", callback_data="source_"),
     ],
 ]
 
 HELP_STRINGS = f"""
-*Â» {BOT_NAME} á´‡xá´„ÊŸá´œsÉªá´ á´‡ êœ°á´‡á´€á´›á´œÊ€á´‡s*
+*» {BOT_NAME} ᴇxᴄʟᴜsɪᴠᴇ ꜰᴇᴀᴛᴜʀᴇs*
 
-âž² /start : êœ±á´›á´€Ê€á´›êœ± á´á´‡ | á´€á´„á´„á´Ê€á´…ÉªÉ´É¢ á´›á´ á´á´‡ Êá´á´œ'á´ á´‡ á´€ÊŸÊ€á´‡á´€á´…Ê á´…á´É´á´‡ Éªá´›.
-âž² /help  : á´€á´ á´€ÉªÊŸá´€Ê™ÊŸá´‡ á´„á´á´á´á´€É´á´…êœ± êœ±á´‡á´„á´›Éªá´É´.
-  â€£ ÉªÉ´ á´˜á´ : á´¡ÉªÊŸÊŸ êœ±á´‡É´á´… Êá´á´œ Êœá´‡ÊŸá´˜ êœ°á´Ê€ á´€ÊŸÊŸ êœ±á´œá´˜á´˜á´Ê€á´›á´‡á´… á´á´á´…á´œÊŸá´‡êœ±.
-  â€£ ÉªÉ´ É¢Ê€á´á´œá´˜ : á´¡ÉªÊŸÊŸ Ê€á´‡á´…ÉªÊ€á´‡á´„á´› Êá´á´œ á´›á´ á´˜á´, á´¡Éªá´›Êœ á´€ÊŸÊŸ á´›Êœá´€á´› Êœá´‡ÊŸá´˜ á´á´á´…á´œÊŸá´‡êœ±."""
+➲ /start : ꜱᴛᴀʀᴛꜱ ᴍᴇ | ᴀᴄᴄᴏʀᴅɪɴɢ ᴛᴏ ᴍᴇ ʏᴏᴜ'ᴠᴇ ᴀʟʀᴇᴀᴅʏ ᴅᴏɴᴇ ɪᴛ.
+➲ /help  : ᴀᴠᴀɪʟᴀʙʟᴇ ᴄᴏᴍᴍᴀɴᴅꜱ ꜱᴇᴄᴛɪᴏɴ.
+  ‣ ɪɴ ᴘᴍ : ᴡɪʟʟ ꜱᴇɴᴅ ʏᴏᴜ ʜᴇʟᴘ ꜰᴏʀ ᴀʟʟ ꜱᴜᴘᴘᴏʀᴛᴇᴅ ᴍᴏᴅᴜʟᴇꜱ.
+  ‣ ɪɴ ɢʀᴏᴜᴘ : ᴡɪʟʟ ʀᴇᴅɪʀᴇᴄᴛ ʏᴏᴜ ᴛᴏ ᴘᴍ, ᴡɪᴛʜ ᴀʟʟ ᴛʜᴀᴛ ʜᴇʟᴘ ᴍᴏᴅᴜʟᴇꜱ."""
 
 IMPORTED = {}
 MIGRATEABLE = []
@@ -173,7 +168,6 @@ def send_help(chat_id, text, keyboard=None):
     )
 
 
-@run_async
 def start(update: Update, context: CallbackContext):
     args = context.args
     uptime = get_readable_time((time.time() - StartTime))
@@ -189,10 +183,12 @@ def start(update: Update, context: CallbackContext):
                     update.effective_chat.id,
                     HELPABLE[mod].__help__,
                     InlineKeyboardMarkup(
-                        [[InlineKeyboardButton(text="â—", callback_data="help_back")]]
+                        [[InlineKeyboardButton(text="◁", callback_data="help_back")]]
                     ),
                 )
 
+            elif args[0].lower() == "markdownhelp":
+                IMPORTED["exᴛʀᴀs"].markdown_help_sender(update)
             elif args[0].lower().startswith("stngs_"):
                 match = re.match("stngs_(.*)", args[0].lower())
                 chat = dispatcher.bot.getChat(match.group(1))
@@ -202,21 +198,24 @@ def start(update: Update, context: CallbackContext):
                 else:
                     send_settings(match.group(1), update.effective_user.id, True)
 
-            elif args[0][1:].isdigit() and "rá´œÊŸá´‡s" in IMPORTED:
-                IMPORTED["rá´œÊŸá´‡s"].send_rules(update, args[0], from_pm=True)
+            elif args[0][1:].isdigit() and "rᴜʟᴇs" in IMPORTED:
+                IMPORTED["rᴜʟᴇs"].send_rules(update, args[0], from_pm=True)
 
         else:
             first_name = update.effective_user.first_name
+            update.effective_message.reply_sticker(
+                "CAACAgUAAxkBAAEPfydlFju--7XLwLrHfR0SB2VhgJyPogACugQAAkbbGFTfb4630GFK3DAE"
+            )
             update.effective_message.reply_text(
-    escaped_text.format(escape_markdown(first_name), BOT_NAME),
-    reply_markup=InlineKeyboardMarkup(buttons),
-    parse_mode=ParseMode.MARKDOWN_V2,
-    timeout=60,
-)
+                PM_START_TEXT.format(escape_markdown(first_name), BOT_NAME),
+                reply_markup=InlineKeyboardMarkup(buttons),
+                parse_mode=ParseMode.MARKDOWN,
+                timeout=60,
+            )
     else:
         update.effective_message.reply_photo(
             START_IMG,
-            caption="Éª á´€á´ á´€ÊŸÉªá´ á´‡ Ê™á´€Ê™Ê !\n<b>Éª á´…Éªá´…É´'á´› sÊŸá´‡á´˜á´› sÉªÉ´á´„á´‡â€‹:</b> <code>{}</code>".format(
+            caption="ɪ ᴀᴍ ᴀʟɪᴠᴇ ʙᴀʙʏ !\n<b>ɪ ᴅɪᴅɴ'ᴛ sʟᴇᴘᴛ sɪɴᴄᴇ:</b> <code>{}</code>".format(
                 uptime
             ),
             parse_mode=ParseMode.HTML,
@@ -281,7 +280,6 @@ def error_callback(update: Update, context: CallbackContext):
         # handle all other telegram related errors
 
 
-@run_async
 def help_button(update, context):
     query = update.callback_query
     mod_match = re.match(r"help_module\((.+?)\)", query.data)
@@ -295,7 +293,7 @@ def help_button(update, context):
         if mod_match:
             module = mod_match.group(1)
             text = (
-                "Â» *á´€á´ á´€ÉªÊŸá´€Ê™ÊŸá´‡ á´„á´á´á´á´€É´á´…s êœ°á´Ê€* *{}* :\n".format(
+                "» *ᴀᴠᴀɪʟᴀʙʟᴇ ᴄᴏᴍᴍᴀɴᴅs ꜰᴏʀ* *{}* :\n".format(
                     HELPABLE[module].__mod_name__
                 )
                 + HELPABLE[module].__help__
@@ -305,7 +303,7 @@ def help_button(update, context):
                 parse_mode=ParseMode.MARKDOWN,
                 disable_web_page_preview=True,
                 reply_markup=InlineKeyboardMarkup(
-                    [[InlineKeyboardButton(text="â—", callback_data="help_back")]]
+                    [[InlineKeyboardButton(text="◁", callback_data="help_back")]]
                 ),
             )
 
@@ -344,79 +342,78 @@ def help_button(update, context):
         pass
 
 
-@run_async
 def Fallen_about_callback(update: Update, context: CallbackContext):
     query = update.callback_query
     if query.data == "fallen_":
         uptime = get_readable_time((time.time() - StartTime))
         query.message.edit_text(
-            text=f"*Êœá´‡Ê,*ðŸ¥€\n  *á´›ÊœÉªs Éªs {BOT_NAME}*"
-            "\n*á´€ á´˜á´á´¡á´‡Ê€êœ°á´œÊŸ É¢Ê€á´á´œá´˜ á´á´€É´á´€É¢á´‡á´á´‡É´á´› Ê™á´á´› Ê™á´œÉªÊŸá´› á´›á´ Êœá´‡ÊŸá´˜ Êá´á´œ á´á´€É´á´€É¢á´‡ Êá´á´œÊ€ É¢Ê€á´á´œá´˜ á´‡á´€êœ±ÉªÊŸÊ á´€É´á´… á´›á´ á´˜Ê€á´á´›á´‡á´„á´› Êá´á´œÊ€ É¢Ê€á´á´œá´˜ êœ°Ê€á´á´ êœ±á´„á´€á´á´á´‡Ê€êœ± á´€É´á´… êœ±á´˜á´€á´á´á´‡Ê€êœ±.*"
-            "\n*á´¡Ê€Éªá´›á´›á´‡É´ ÉªÉ´ á´©Êá´›Êœá´É´ á´¡Éªá´›Êœ sÇ«ÊŸá´€ÊŸá´„Êœá´‡á´Ê á´€É´á´… á´á´É´É¢á´á´…Ê™ á´€s á´…á´€á´›á´€Ê™á´€sá´‡.*"
-            "\n\nâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€"
-            f"\n*âž» á´œá´©á´›Éªá´á´‡ Â»* {uptime}"
-            f"\n*âž» á´œsá´‡Ê€s Â»* {sql.num_users()}"
-            f"\n*âž» á´„Êœá´€á´›s Â»* {sql.num_chats()}"
-            "\nâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€"
-            "\n\nâž²  Éª á´„á´€É´ Ê€á´‡êœ±á´›Ê€Éªá´„á´› á´œêœ±á´‡Ê€êœ±."
-            "\nâž²  Éª Êœá´€á´ á´‡ á´€É´ á´€á´…á´ á´€É´á´„á´‡á´… á´€É´á´›Éª-êœ°ÊŸá´á´á´… êœ±Êêœ±á´›á´‡á´."
-            "\nâž²  Éª á´„á´€É´ É¢Ê€á´‡á´‡á´› á´œêœ±á´‡Ê€êœ± á´¡Éªá´›Êœ á´„á´œêœ±á´›á´á´Éªá´¢á´€Ê™ÊŸá´‡ á´¡á´‡ÊŸá´„á´á´á´‡ á´á´‡êœ±êœ±á´€É¢á´‡êœ± á´€É´á´… á´‡á´ á´‡É´ êœ±á´‡á´› á´€ É¢Ê€á´á´œá´˜'êœ± Ê€á´œÊŸá´‡êœ±."
-            "\nâž²  Éª á´„á´€É´ á´¡á´€Ê€É´ á´œêœ±á´‡Ê€êœ± á´œÉ´á´›ÉªÊŸ á´›Êœá´‡Ê Ê€á´‡á´€á´„Êœ á´á´€x á´¡á´€Ê€É´êœ±, á´¡Éªá´›Êœ á´‡á´€á´„Êœ á´˜Ê€á´‡á´…á´‡êœ°ÉªÉ´á´‡á´… á´€á´„á´›Éªá´É´êœ± êœ±á´œá´„Êœ á´€êœ± Ê™á´€É´, á´á´œá´›á´‡, á´‹Éªá´„á´‹, á´‡á´›á´„."
-            "\nâž²  Éª Êœá´€á´ á´‡ á´€ É´á´á´›á´‡ á´‹á´‡á´‡á´˜ÉªÉ´É¢ êœ±Êêœ±á´›á´‡á´, Ê™ÊŸá´€á´„á´‹ÊŸÉªêœ±á´›êœ±, á´€É´á´… á´‡á´ á´‡É´ á´˜Ê€á´‡á´…á´‡á´›á´‡Ê€á´ÉªÉ´á´‡á´… Ê€á´‡á´˜ÊŸÉªá´‡êœ± á´É´ á´„á´‡Ê€á´›á´€ÉªÉ´ á´‹á´‡Êá´¡á´Ê€á´…êœ±."
-            f"\n\nâž» á´„ÊŸÉªá´„á´‹ á´É´ á´›Êœá´‡ Ê™á´œá´›á´›á´É´s É¢Éªá´ á´‡É´ Ê™á´‡ÊŸá´á´¡ Ò“á´Ê€ É¢á´‡á´›á´›ÉªÉ´É¢ Ê™á´€sÉªá´„ Êœá´‡ÊŸá´© á´€É´á´… ÉªÉ´Ò“á´ á´€Ê™á´á´œá´› {BOT_NAME}.",
+            text=f"*ʜᴇʏ,*🥀\n  *ᴛʜɪs ɪs {BOT_NAME}*"
+            "\n*ᴀ ᴘᴏᴡᴇʀꜰᴜʟ ɢʀᴏᴜᴘ ᴍᴀɴᴀɢᴇᴍᴇɴᴛ ʙᴏᴛ ʙᴜɪʟᴛ ᴛᴏ ʜᴇʟᴘ ʏᴏᴜ ᴍᴀɴᴀɢᴇ ʏᴏᴜʀ ɢʀᴏᴜᴘ ᴇᴀꜱɪʟʏ ᴀɴᴅ ᴛᴏ ᴘʀᴏᴛᴇᴄᴛ ʏᴏᴜʀ ɢʀᴏᴜᴘ ꜰʀᴏᴍ ꜱᴄᴀᴍᴍᴇʀꜱ ᴀɴᴅ ꜱᴘᴀᴍᴍᴇʀꜱ.*"
+            "\n*ᴡʀɪᴛᴛᴇɴ ɪɴ ᴩʏᴛʜᴏɴ ᴡɪᴛʜ sǫʟᴀʟᴄʜᴇᴍʏ ᴀɴᴅ ᴍᴏɴɢᴏᴅʙ ᴀs ᴅᴀᴛᴀʙᴀsᴇ.*"
+            "\n\n────────────────────"
+            f"\n*➻ ᴜᴩᴛɪᴍᴇ »* {uptime}"
+            f"\n*➻ ᴜsᴇʀs »* {sql.num_users()}"
+            f"\n*➻ ᴄʜᴀᴛs »* {sql.num_chats()}"
+            "\n────────────────────"
+            "\n\n➲  ɪ ᴄᴀɴ ʀᴇꜱᴛʀɪᴄᴛ ᴜꜱᴇʀꜱ."
+            "\n➲  ɪ ʜᴀᴠᴇ ᴀɴ ᴀᴅᴠᴀɴᴄᴇᴅ ᴀɴᴛɪ-ꜰʟᴏᴏᴅ ꜱʏꜱᴛᴇᴍ."
+            "\n➲  ɪ ᴄᴀɴ ɢʀᴇᴇᴛ ᴜꜱᴇʀꜱ ᴡɪᴛʜ ᴄᴜꜱᴛᴏᴍɪᴢᴀʙʟᴇ ᴡᴇʟᴄᴏᴍᴇ ᴍᴇꜱꜱᴀɢᴇꜱ ᴀɴᴅ ᴇᴠᴇɴ ꜱᴇᴛ ᴀ ɢʀᴏᴜᴘ'ꜱ ʀᴜʟᴇꜱ."
+            "\n➲  ɪ ᴄᴀɴ ᴡᴀʀɴ ᴜꜱᴇʀꜱ ᴜɴᴛɪʟ ᴛʜᴇʏ ʀᴇᴀᴄʜ ᴍᴀx ᴡᴀʀɴꜱ, ᴡɪᴛʜ ᴇᴀᴄʜ ᴘʀᴇᴅᴇꜰɪɴᴇᴅ ᴀᴄᴛɪᴏɴꜱ ꜱᴜᴄʜ ᴀꜱ ʙᴀɴ, ᴍᴜᴛᴇ, ᴋɪᴄᴋ, ᴇᴛᴄ."
+            "\n➲  ɪ ʜᴀᴠᴇ ᴀ ɴᴏᴛᴇ ᴋᴇᴇᴘɪɴɢ ꜱʏꜱᴛᴇᴍ, ʙʟᴀᴄᴋʟɪꜱᴛꜱ, ᴀɴᴅ ᴇᴠᴇɴ ᴘʀᴇᴅᴇᴛᴇʀᴍɪɴᴇᴅ ʀᴇᴘʟɪᴇꜱ ᴏɴ ᴄᴇʀᴛᴀɪɴ ᴋᴇʏᴡᴏʀᴅꜱ."
+            f"\n\n➻ ᴄʟɪᴄᴋ ᴏɴ ᴛʜᴇ ʙᴜᴛᴛᴏɴs ɢɪᴠᴇɴ ʙᴇʟᴏᴡ ғᴏʀ ɢᴇᴛᴛɪɴɢ ʙᴀsɪᴄ ʜᴇʟᴩ ᴀɴᴅ ɪɴғᴏ ᴀʙᴏᴜᴛ {BOT_NAME}.",
             parse_mode=ParseMode.MARKDOWN,
             disable_web_page_preview=True,
             reply_markup=InlineKeyboardMarkup(
                 [
                     [
                         InlineKeyboardButton(
-                            text="sá´œá´©á´©á´Ê€á´›", callback_data="fallen_support"
+                            text="sᴜᴩᴩᴏʀᴛ", callback_data="fallen_support"
                         ),
                         InlineKeyboardButton(
-                            text="á´„á´á´á´á´€É´á´…s", callback_data="help_back"
+                            text="ᴄᴏᴍᴍᴀɴᴅs", callback_data="help_back"
                         ),
                     ],
                     [
                         InlineKeyboardButton(
-                            text="á´…á´‡á´ á´‡ÊŸá´á´©á´‡Ê€", url=f"tg://user?id={OWNER_ID}"
+                            text="ᴅᴇᴠᴇʟᴏᴩᴇʀ", url=f"tg://user?id={OWNER_ID}"
                         ),
                         InlineKeyboardButton(
-                            text="sá´á´œÊ€á´„á´‡",
+                            text="sᴏᴜʀᴄᴇ",
                             callback_data="source_",
                         ),
                     ],
                     [
-                        InlineKeyboardButton(text="â—", callback_data="fallen_back"),
+                        InlineKeyboardButton(text="◁", callback_data="fallen_back"),
                     ],
                 ]
             ),
         )
     elif query.data == "fallen_support":
         query.message.edit_text(
-            text="*à¹ á´„ÊŸÉªá´„á´‹ á´É´ á´›Êœá´‡ Ê™á´œá´›á´›á´É´s É¢Éªá´ á´‡É´ Ê™á´‡ÊŸá´á´¡ á´›á´ É¢á´‡á´› Êœá´‡ÊŸá´© á´€É´á´… á´á´Ê€á´‡ ÉªÉ´Ò“á´Ê€á´á´€á´›Éªá´É´ á´€Ê™á´á´œá´› á´á´‡.*"
-            f"\n\nÉªÒ“ Êá´á´œ Ò“á´á´œÉ´á´… á´€É´Ê Ê™á´œÉ¢ ÉªÉ´ {BOT_NAME} á´Ê€ ÉªÒ“ Êá´á´œ á´¡á´€É´É´á´€ É¢Éªá´ á´‡ Ò“á´‡á´‡á´…Ê™á´€á´„á´‹ á´€Ê™á´á´œá´› á´›Êœá´‡ {BOT_NAME}, á´©ÊŸá´‡á´€sá´‡ Ê€á´‡á´©á´Ê€á´› Éªá´› á´€á´› sá´œá´©á´©á´Ê€á´› á´„Êœá´€á´›.",
+            text="*๏ ᴄʟɪᴄᴋ ᴏɴ ᴛʜᴇ ʙᴜᴛᴛᴏɴs ɢɪᴠᴇɴ ʙᴇʟᴏᴡ ᴛᴏ ɢᴇᴛ ʜᴇʟᴩ ᴀɴᴅ ᴍᴏʀᴇ ɪɴғᴏʀᴍᴀᴛɪᴏɴ ᴀʙᴏᴜᴛ ᴍᴇ.*"
+            f"\n\nɪғ ʏᴏᴜ ғᴏᴜɴᴅ ᴀɴʏ ʙᴜɢ ɪɴ {BOT_NAME} ᴏʀ ɪғ ʏᴏᴜ ᴡᴀɴɴᴀ ɢɪᴠᴇ ғᴇᴇᴅʙᴀᴄᴋ ᴀʙᴏᴜᴛ ᴛʜᴇ {BOT_NAME}, ᴩʟᴇᴀsᴇ ʀᴇᴩᴏʀᴛ ɪᴛ ᴀᴛ sᴜᴩᴩᴏʀᴛ ᴄʜᴀᴛ.",
             parse_mode=ParseMode.MARKDOWN,
             reply_markup=InlineKeyboardMarkup(
                 [
                     [
                         InlineKeyboardButton(
-                            text="sá´œá´©á´©á´Ê€á´›", url=f"https://t.me/{SUPPORT_CHAT}"
+                            text="sᴜᴩᴩᴏʀᴛ", url=f"https://t.me/{SUPPORT_CHAT}"
                         ),
                         InlineKeyboardButton(
-                            text="á´œá´©á´…á´€á´›á´‡s", url=f"https://t.me/{SUPPORT_CHAT}"
+                            text="ᴜᴩᴅᴀᴛᴇs", url=f"https://t.me/{SUPPORT_CHAT}"
                         ),
                     ],
                     [
                         InlineKeyboardButton(
-                            text="á´…á´‡á´ á´‡ÊŸá´á´©á´‡Ê€", url=f"tg://user?id={OWNER_ID}"
+                            text="ᴅᴇᴠᴇʟᴏᴩᴇʀ", url=f"tg://user?id={OWNER_ID}"
                         ),
                         InlineKeyboardButton(
-                            text="É¢Éªá´›Êœá´œÊ™",
-                            url="https://github.com/AnonymousX1025",
+                            text="ɢɪᴛʜᴜʙ",
+                            url="https://github.com/WCGKING",
                         ),
                     ],
                     [
-                        InlineKeyboardButton(text="â—", callback_data="fallen_"),
+                        InlineKeyboardButton(text="◁", callback_data="fallen_"),
                     ],
                 ]
             ),
@@ -432,32 +429,31 @@ def Fallen_about_callback(update: Update, context: CallbackContext):
         )
 
 
-@run_async
 def Source_about_callback(update: Update, context: CallbackContext):
     query = update.callback_query
     if query.data == "source_":
         query.message.edit_text(
             text=f"""
-*Êœá´‡Ê,
- á´›ÊœÉªs Éªs {BOT_NAME},
-á´€É´ á´á´©á´‡É´ sá´á´œÊ€á´„á´‡ á´›á´‡ÊŸá´‡É¢Ê€á´€á´ É¢Ê€á´á´œá´© á´á´€É´á´€É¢á´‡á´á´‡É´á´› Ê™á´á´›.*
+*ʜᴇʏ,
+ ᴛʜɪs ɪs {BOT_NAME},
+ᴀɴ ᴏᴩᴇɴ sᴏᴜʀᴄᴇ ᴛᴇʟᴇɢʀᴀᴍ ɢʀᴏᴜᴩ ᴍᴀɴᴀɢᴇᴍᴇɴᴛ ʙᴏᴛ.*
 
-á´¡Ê€Éªá´›á´›á´‡É´ ÉªÉ´ á´©Êá´›Êœá´É´ á´¡Éªá´›Êœ á´›Êœá´‡ Êœá´‡ÊŸá´© á´Ò“ : [á´›á´‡ÊŸá´‡á´›Êœá´É´](https://github.com/LonamiWebs/Telethon)
-[á´©ÊÊ€á´É¢Ê€á´€á´](https://github.com/pyrogram/pyrogram)
-[á´©Êá´›Êœá´É´-á´›á´‡ÊŸá´‡É¢Ê€á´€á´-Ê™á´á´›](https://github.com/python-telegram-bot/python-telegram-bot)
-á´€É´á´… á´œsÉªÉ´É¢ [sÇ«ÊŸá´€ÊŸá´„Êœá´‡á´Ê](https://www.sqlalchemy.org) á´€É´á´… [á´á´É´É¢á´](https://cloud.mongodb.com) á´€s á´…á´€á´›á´€Ê™á´€sá´‡.
-
-
-*Êœá´‡Ê€á´‡ Éªs á´Ê sá´á´œÊ€á´„á´‡ á´„á´á´…á´‡ :* [É¢Éªá´›Êœá´œÊ™](https://github.com/AnonymousX1025/FallenRobot)
+ᴡʀɪᴛᴛᴇɴ ɪɴ ᴩʏᴛʜᴏɴ ᴡɪᴛʜ ᴛʜᴇ ʜᴇʟᴩ ᴏғ : [ᴛᴇʟᴇᴛʜᴏɴ](https://github.com/LonamiWebs/Telethon)
+[ᴩʏʀᴏɢʀᴀᴍ](https://github.com/pyrogram/pyrogram)
+[ᴩʏᴛʜᴏɴ-ᴛᴇʟᴇɢʀᴀᴍ-ʙᴏᴛ](https://github.com/python-telegram-bot/python-telegram-bot)
+ᴀɴᴅ ᴜsɪɴɢ [sǫʟᴀʟᴄʜᴇᴍʏ](https://www.sqlalchemy.org) ᴀɴᴅ [ᴍᴏɴɢᴏ](https://cloud.mongodb.com) ᴀs ᴅᴀᴛᴀʙᴀsᴇ.
 
 
-{BOT_NAME} Éªs ÊŸÉªá´„á´‡É´sá´‡á´… á´œÉ´á´…á´‡Ê€ á´›Êœá´‡ [á´Éªá´› ÊŸÉªá´„á´‡É´sá´‡](https://github.com/AnonymousX1025/FallenRobot/blob/master/LICENSE).
-Â© 2022 - 2023 [@SFW_BotCore](https://t.me/{SUPPORT_CHAT}), á´€ÊŸÊŸ Ê€ÉªÉ¢Êœá´›s Ê€á´‡sá´‡Ê€á´ á´‡á´….
+*ʜᴇʀᴇ ɪs ᴍʏ sᴏᴜʀᴄᴇ ᴄᴏᴅᴇ :* [ɢɪᴛʜᴜʙ](https://github.com/WCGKING/BRANDED-ROBOT)
+
+
+{BOT_NAME} ɪs ʟɪᴄᴇɴsᴇᴅ ᴜɴᴅᴇʀ ᴛʜᴇ [ᴍɪᴛ ʟɪᴄᴇɴsᴇ](https://github.com/WCGKING/BRANDED-ROBOTblob/master/LICENSE).
+© 2022 - 2023 | [sᴜᴘᴘᴏʀᴛ ᴄʜᴀᴛ](https://t.me/{SUPPORT_CHAT}), ᴀʟʟ ʀɪɢʜᴛs ʀᴇsᴇʀᴠᴇᴅ.
 """,
             parse_mode=ParseMode.MARKDOWN,
             disable_web_page_preview=True,
             reply_markup=InlineKeyboardMarkup(
-                [[InlineKeyboardButton(text="â—", callback_data="source_back")]]
+                [[InlineKeyboardButton(text="◁", callback_data="source_back")]]
             ),
         )
     elif query.data == "source_back":
@@ -471,7 +467,6 @@ def Source_about_callback(update: Update, context: CallbackContext):
         )
 
 
-@run_async
 def get_help(update: Update, context: CallbackContext):
     chat = update.effective_chat  # type: Optional[Chat]
     args = update.effective_message.text.split(None, 1)
@@ -486,7 +481,7 @@ def get_help(update: Update, context: CallbackContext):
                     [
                         [
                             InlineKeyboardButton(
-                                text="Êœá´‡ÊŸá´˜",
+                                text="ʜᴇʟᴘ",
                                 url="https://t.me/{}?start=ghelp_{}".format(
                                     context.bot.username, module
                                 ),
@@ -495,4 +490,81 @@ def get_help(update: Update, context: CallbackContext):
                     ]
                 ),
             )
-   
+            return
+        update.effective_message.reply_text(
+            "» ᴄʜᴏᴏsᴇ ᴀɴ ᴏᴩᴛɪᴏɴ ғᴏʀ ɢᴇᴛᴛɪɴɢ ʜᴇʟᴩ.",
+            reply_markup=InlineKeyboardMarkup(
+                [
+                    [
+                        InlineKeyboardButton(
+                            text="ᴏᴩᴇɴ ɪɴ ᴩʀɪᴠᴀᴛᴇ",
+                            url="https://t.me/{}?start=help".format(
+                                context.bot.username
+                            ),
+                        )
+                    ],
+                    [
+                        InlineKeyboardButton(
+                            text="ᴏᴩᴇɴ ʜᴇʀᴇ",
+                            callback_data="help_back",
+                        )
+                    ],
+                ]
+            ),
+        )
+        return
+
+    elif len(args) >= 2 and any(args[1].lower() == x for x in HELPABLE):
+        module = args[1].lower()
+        text = (
+            "Here is the available help for the *{}* module:\n".format(
+                HELPABLE[module].__mod_name__
+            )
+            + HELPABLE[module].__help__
+        )
+        send_help(
+            chat.id,
+            text,
+            InlineKeyboardMarkup(
+                [[InlineKeyboardButton(text="◁", callback_data="help_back")]]
+            ),
+        )
+
+    else:
+        send_help(chat.id, HELP_STRINGS)
+
+
+def send_settings(chat_id, user_id, user=False):
+    if user:
+        if USER_SETTINGS:
+            settings = "\n\n".join(
+                "*{}*:\n{}".format(mod.__mod_name__, mod.__user_settings__(user_id))
+                for mod in USER_SETTINGS.values()
+            )
+            dispatcher.bot.send_message(
+                user_id,
+                "These are your current settings:" + "\n\n" + settings,
+                parse_mode=ParseMode.MARKDOWN,
+            )
+
+        else:
+            dispatcher.bot.send_message(
+                user_id,
+                "Seems like there aren't any user specific settings available :'(",
+                parse_mode=ParseMode.MARKDOWN,
+            )
+
+    else:
+        if CHAT_SETTINGS:
+            chat_name = dispatcher.bot.getChat(chat_id).title
+            dispatcher.bot.send_message(
+                user_id,
+                text="Which module would you like to check {}'s settings for?".format(
+                    chat_name
+                ),
+                reply_markup=InlineKeyboardMarkup(
+                    paginate_modules(0, CHAT_SETTINGS, "stngs", chat=chat_id)
+                ),
+            )
+        else:
+ 
