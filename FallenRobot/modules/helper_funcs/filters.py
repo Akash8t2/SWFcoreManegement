@@ -6,19 +6,22 @@ from FallenRobot import DEMONS, DEV_USERS, DRAGONS
 
 class CustomFilters(object):
     class _Supporters(BaseFilter):
-        def __call__(self, message: Message):
+        def __call__(self, update):
+            message = update.message
             return bool(message.from_user and message.from_user.id in DEMONS)
 
     support_filter = _Supporters()
 
     class _Sudoers(BaseFilter):
-        def __call__(self, message: Message):
+        def __call__(self, update):
+            message = update.message
             return bool(message.from_user and message.from_user.id in DRAGONS)
 
     sudo_filter = _Sudoers()
 
     class _Developers(BaseFilter):
-        def __call__(self, message: Message):
+        def __call__(self, update):
+            message = update.message
             return bool(message.from_user and message.from_user.id in DEV_USERS)
 
     dev_filter = _Developers()
@@ -28,7 +31,8 @@ class CustomFilters(object):
             self.mime_type = mimetype
             self.name = "CustomFilters.mime_type({})".format(self.mime_type)
 
-        def __call__(self, message: Message):
+        def __call__(self, update):
+            message = update.message
             return bool(
                 message.document and message.document.mime_type == self.mime_type,
             )
@@ -36,7 +40,9 @@ class CustomFilters(object):
     mime_type = _MimeType
 
     class _HasText(BaseFilter):
-        def __call__(self, message: Message):
+        def __call__(self, update):
+            message = update.message
+            # Check for text, sticker, photo, document, or video
             return bool(
                 message.text
                 or message.sticker
