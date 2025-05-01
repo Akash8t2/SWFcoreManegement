@@ -204,7 +204,7 @@ def start(update: Update, context: CallbackContext):
         else:
             first_name = update.effective_user.first_name
             update.effective_message.reply_sticker(
-                "CAACAgUAAxkBAAEPfydlFju--7XLwLrHfR0SB2VhgJyPogACugQAAkbbGFTfb4630GFK3DAE"
+                "CAACAgUAAxUAAWgTr4nuKhWnHhHpQHN-iJx6_9NvAAJDFQACdDmhVNzoh_Vcv0tzNgQ"
             )
             update.effective_message.reply_text(
                 PM_START_TEXT.format(escape_markdown(first_name), BOT_NAME),
@@ -409,7 +409,7 @@ def Fallen_about_callback(update: Update, context: CallbackContext):
                         ),
                         InlineKeyboardButton(
                             text="ɢɪᴛʜᴜʙ",
-                            url="https://github.com/WCGKING",
+                            url="https://github.com/Akash8t2",
                         ),
                     ],
                     [
