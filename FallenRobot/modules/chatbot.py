@@ -1,6 +1,8 @@
 import html
 import json
 import re
+import unicodedata
+import string
 from time import sleep
 
 import requests
@@ -33,13 +35,22 @@ GEMINI_API_KEY = "AIzaSyBm1Sy9DHcKQ0-hyUn6ues100vrxPWHoGE"
 GEMINI_API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_API_KEY}"
 
 
+def extract_clean_name(raw_name):
+    normalized = unicodedata.normalize('NFKD', raw_name)
+    clean = ''.join(ch for ch in normalized if ch.isalnum() or ch.isspace())
+    words = clean.split()
+    if words:
+        return words[0].capitalize()
+    return "Unknown"
+
+
 @run_async
 @user_admin_no_reply
 @gloggable
 def fallenrm(update: Update, context: CallbackContext) -> str:
     query: CallbackQuery = update.callback_query
     user: User = update.effective_user
-    match = re.match(r"rm_chat(.+?)", query.data)
+    match = re.match(r"rm_chat(\d+)", query.data)
     if match:
         user_id = match.group(1)
         chat: Chat = update.effective_chat
@@ -64,7 +75,7 @@ def fallenrm(update: Update, context: CallbackContext) -> str:
 def fallenadd(update: Update, context: CallbackContext) -> str:
     query: CallbackQuery = update.callback_query
     user: User = update.effective_user
-    match = re.match(r"add_chat(.+?)", query.data)
+    match = re.match(r"add_chat(\d+)", query.data)
     if match:
         user_id = match.group(1)
         chat: Chat = update.effective_chat
@@ -90,8 +101,8 @@ def fallen(update: Update, context: CallbackContext):
     message = update.effective_message
     keyboard = InlineKeyboardMarkup(
         [[
-            InlineKeyboardButton(text="✅ Enable", callback_data=f"add_chat({message.chat_id})"),
-            InlineKeyboardButton(text="❌ Disable", callback_data=f"rm_chat({message.chat_id})"),
+            InlineKeyboardButton(text="✅ Enable", callback_data=f"add_chat{message.chat_id}"),
+            InlineKeyboardButton(text="❌ Disable", callback_data=f"rm_chat{message.chat_id}"),
         ]]
     )
     message.reply_text(
@@ -121,6 +132,12 @@ def chatbot(update: Update, context: CallbackContext):
         return
 
     if message.text and not message.document:
+        if re.search(r"(mera|meri).*(naam|name)", message.text.lower()):
+            raw_name = message.from_user.full_name or message.from_user.username or ""
+            probable_name = extract_clean_name(raw_name)
+            message.reply_text(f"ᴀᴀᴩᴋᴀ ɴᴀᴀᴍ {probable_name} ʜᴏ sᴀᴋᴛᴀ ʜᴀɪ.")
+            return
+
         if not fallen_message(context, message):
             return
 
@@ -128,11 +145,7 @@ def chatbot(update: Update, context: CallbackContext):
 
         prompt = message.text
         payload = {
-            "contents": [
-                {
-                    "parts": [{"text": prompt}]
-                }
-            ]
+            "contents": [{"parts": [{"text": prompt}]}]
         }
 
         try:
@@ -154,24 +167,23 @@ def chatbot(update: Update, context: CallbackContext):
                 message.reply_text(reply)
             else:
                 message.reply_text("No response from Gemini AI.")
-        except Exception as e:
+        except Exception:
             message.reply_text("Chatbot error: Could not connect to Gemini API.")
 
 
 __help__ = f"""
 *{BOT_NAME} has a chatbot powered by Gemini AI:*
 
-» /chatbot *:* Enable/disable chatbot replies in group.
+» /chatbot : Enable/disable chatbot replies in group.
 """
 
 __mod_name__ = "Cʜᴀᴛʙᴏᴛ"
 
 CHATBOTK_HANDLER = CommandHandler("chatbot", fallen)
-ADD_CHAT_HANDLER = CallbackQueryHandler(fallenadd, pattern=r"add_chat")
-RM_CHAT_HANDLER = CallbackQueryHandler(fallenrm, pattern=r"rm_chat")
+ADD_CHAT_HANDLER = CallbackQueryHandler(fallenadd, pattern=r"add_chat\d+")
+RM_CHAT_HANDLER = CallbackQueryHandler(fallenrm, pattern=r"rm_chat\d+")
 CHATBOT_HANDLER = MessageHandler(
-    Filters.text
-    & (~Filters.regex(r"^#[^\s]+") & ~Filters.regex(r"^!") & ~Filters.regex(r"^\/")),
+    Filters.text & (~Filters.regex(r"^#[^\s]+") & ~Filters.regex(r"^!") & ~Filters.regex(r"^/")),
     chatbot,
 )
 
