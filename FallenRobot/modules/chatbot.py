@@ -54,7 +54,6 @@ def fallenrm(update: Update, context: CallbackContext) -> str:
                 ),
                 parse_mode=ParseMode.HTML,
             )
-
     return ""
 
 
@@ -83,7 +82,6 @@ def fallenadd(update: Update, context: CallbackContext) -> str:
                 ),
                 parse_mode=ParseMode.HTML,
             )
-
     return ""
 
 
@@ -114,11 +112,9 @@ def fallen_message(context: CallbackContext, message):
         return True
     elif BOT_USERNAME in message.text.upper():
         return True
-    elif reply_message:
-        if reply_message.from_user.id == BOT_ID:
-            return True
-    else:
-        return False
+    elif reply_message and reply_message.from_user.id == BOT_ID:
+        return True
+    return False
 
 
 def chatbot(update: Update, context: CallbackContext):
@@ -134,18 +130,19 @@ def chatbot(update: Update, context: CallbackContext):
             return
         bot.send_chat_action(chat_id, action="typing")
         try:
-            url = f"https://some-random-api.ml/chatbot?message={message.text}&bot_name={BOT_NAME}&owner=Anonymous"
+            user_msg = message.text
+            url = f"http://api.program-o.com/v2/chatbot/?bot_id=6&say={user_msg}&convo_id={chat_id}&format=json"
             response = requests.get(url)
             data = response.json()
-            reply = data.get("response", "I don't know how to respond.")
+            reply = data.get("botsay", "I don't know how to respond.")
             sleep(0.5)
             message.reply_text(reply)
-        except Exception as e:
+        except Exception:
             message.reply_text("Chatbot error: Unable to get response.")
 
 
 __help__ = f"""
-*{BOT_NAME} has an chatbot which provides you a seamless chatting experience :*
+*{BOT_NAME} has a chatbot that provides you a seamless chatting experience :*
 
  »  /chatbot *:* Shows chatbot control panel
 """
