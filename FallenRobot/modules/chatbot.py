@@ -12,6 +12,7 @@ from telegram import (
     ParseMode,
     Update,
     User,
+    ChatAction,
 )
 from telegram.ext import (
     CallbackContext,
@@ -28,6 +29,9 @@ from FallenRobot import BOT_ID, BOT_NAME, BOT_USERNAME, dispatcher
 from FallenRobot.modules.helper_funcs.chat_status import user_admin, user_admin_no_reply
 from FallenRobot.modules.log_channel import gloggable
 
+GEMINI_API_KEY = "AIzaSyBm1Sy9DHcKQ0-hyUn6ues100vrxPWHoGE"
+GEMINI_API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_API_KEY}"
+
 
 @run_async
 @user_admin_no_reply
@@ -39,9 +43,8 @@ def fallenrm(update: Update, context: CallbackContext) -> str:
     if match:
         user_id = match.group(1)
         chat: Chat = update.effective_chat
-        is_fallen = sql.set_fallen(chat.id)
-        if is_fallen:
-            is_fallen = sql.set_fallen(user_id)
+        if sql.set_fallen(chat.id):
+            sql.set_fallen(user_id)
             return (
                 f"<b>{html.escape(chat.title)}:</b>\n"
                 f"AI_DISABLED\n"
@@ -49,9 +52,7 @@ def fallenrm(update: Update, context: CallbackContext) -> str:
             )
         else:
             update.effective_message.edit_text(
-                "{} ᴄʜᴀᴛʙᴏᴛ ᴅɪsᴀʙʟᴇᴅ ʙʏ {}.".format(
-                    dispatcher.bot.first_name, mention_html(user.id, user.first_name)
-                ),
+                f"{dispatcher.bot.first_name} ᴄʜᴀᴛʙᴏᴛ ᴅɪsᴀʙʟᴇᴅ ʙʏ {mention_html(user.id, user.first_name)}.",
                 parse_mode=ParseMode.HTML,
             )
     return ""
@@ -67,19 +68,16 @@ def fallenadd(update: Update, context: CallbackContext) -> str:
     if match:
         user_id = match.group(1)
         chat: Chat = update.effective_chat
-        is_fallen = sql.rem_fallen(chat.id)
-        if is_fallen:
-            is_fallen = sql.rem_fallen(user_id)
+        if sql.rem_fallen(chat.id):
+            sql.rem_fallen(user_id)
             return (
                 f"<b>{html.escape(chat.title)}:</b>\n"
-                f"AI_ENABLE\n"
+                f"AI_ENABLED\n"
                 f"<b>Admin :</b> {mention_html(user.id, html.escape(user.first_name))}\n"
             )
         else:
             update.effective_message.edit_text(
-                "{} ᴄʜᴀᴛʙᴏᴛ ᴇɴᴀʙʟᴇᴅ ʙʏ {}.".format(
-                    dispatcher.bot.first_name, mention_html(user.id, user.first_name)
-                ),
+                f"{dispatcher.bot.first_name} ᴄʜᴀᴛʙᴏᴛ ᴇɴᴀʙʟᴇᴅ ʙʏ {mention_html(user.id, user.first_name)}.",
                 parse_mode=ParseMode.HTML,
             )
     return ""
@@ -90,17 +88,14 @@ def fallenadd(update: Update, context: CallbackContext) -> str:
 @gloggable
 def fallen(update: Update, context: CallbackContext):
     message = update.effective_message
-    msg = "• ᴄʜᴏᴏsᴇ ᴀɴ ᴏᴩᴛɪᴏɴ ᴛᴏ ᴇɴᴀʙʟᴇ/ᴅɪsᴀʙʟᴇ ᴄʜᴀᴛʙᴏᴛ"
     keyboard = InlineKeyboardMarkup(
-        [
-            [
-                InlineKeyboardButton(text="ᴇɴᴀʙʟᴇ", callback_data="add_chat({})"),
-                InlineKeyboardButton(text="ᴅɪsᴀʙʟᴇ", callback_data="rm_chat({})"),
-            ],
-        ]
+        [[
+            InlineKeyboardButton(text="✅ Enable", callback_data=f"add_chat({message.chat_id})"),
+            InlineKeyboardButton(text="❌ Disable", callback_data=f"rm_chat({message.chat_id})"),
+        ]]
     )
     message.reply_text(
-        text=msg,
+        text="• ᴄʜᴏᴏsᴇ ᴀɴ ᴏᴩᴛɪᴏɴ ᴛᴏ ᴇɴᴀʙʟᴇ/ᴅɪsᴀʙʟᴇ ᴄʜᴀᴛʙᴏᴛ",
         reply_markup=keyboard,
         parse_mode=ParseMode.HTML,
     )
@@ -128,23 +123,45 @@ def chatbot(update: Update, context: CallbackContext):
     if message.text and not message.document:
         if not fallen_message(context, message):
             return
-        bot.send_chat_action(chat_id, action="typing")
+
+        bot.send_chat_action(chat_id=chat_id, action=ChatAction.TYPING)
+
+        prompt = message.text
+        payload = {
+            "contents": [
+                {
+                    "parts": [{"text": prompt}]
+                }
+            ]
+        }
+
         try:
-            user_msg = message.text
-            url = f"http://api.program-o.com/v2/chatbot/?bot_id=6&say={user_msg}&convo_id={chat_id}&format=json"
-            response = requests.get(url)
+            response = requests.post(
+                GEMINI_API_URL,
+                headers={"Content-Type": "application/json"},
+                json=payload,
+                timeout=10
+            )
             data = response.json()
-            reply = data.get("botsay", "I don't know how to respond.")
-            sleep(0.5)
-            message.reply_text(reply)
-        except Exception:
-            message.reply_text("Chatbot error: Unable to get response.")
+            reply = (
+                data.get("candidates", [{}])[0]
+                    .get("content", {})
+                    .get("parts", [{}])[0]
+                    .get("text")
+            )
+            if reply:
+                sleep(0.5)
+                message.reply_text(reply)
+            else:
+                message.reply_text("No response from Gemini AI.")
+        except Exception as e:
+            message.reply_text("Chatbot error: Could not connect to Gemini API.")
 
 
 __help__ = f"""
-*{BOT_NAME} has a chatbot that provides you a seamless chatting experience :*
+*{BOT_NAME} has a chatbot powered by Gemini AI:*
 
- »  /chatbot *:* Shows chatbot control panel
+» /chatbot *:* Enable/disable chatbot replies in group.
 """
 
 __mod_name__ = "Cʜᴀᴛʙᴏᴛ"
