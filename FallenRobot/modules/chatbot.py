@@ -33,12 +33,12 @@ from FallenRobot.modules.log_channel import gloggable
 @user_admin_no_reply
 @gloggable
 def fallenrm(update: Update, context: CallbackContext) -> str:
-    query: Optional[CallbackQuery] = update.callback_query
-    user: Optional[User] = update.effective_user
-    match = re.match(r"rm_chat\((.+?)\)", query.data)
+    query: CallbackQuery = update.callback_query
+    user: User = update.effective_user
+    match = re.match(r"rm_chat(.+?)", query.data)
     if match:
         user_id = match.group(1)
-        chat: Optional[Chat] = update.effective_chat
+        chat: Chat = update.effective_chat
         is_fallen = sql.set_fallen(chat.id)
         if is_fallen:
             is_fallen = sql.set_fallen(user_id)
@@ -54,7 +54,6 @@ def fallenrm(update: Update, context: CallbackContext) -> str:
                 ),
                 parse_mode=ParseMode.HTML,
             )
-
     return ""
 
 
@@ -62,12 +61,12 @@ def fallenrm(update: Update, context: CallbackContext) -> str:
 @user_admin_no_reply
 @gloggable
 def fallenadd(update: Update, context: CallbackContext) -> str:
-    query: Optional[CallbackQuery] = update.callback_query
-    user: Optional[User] = update.effective_user
-    match = re.match(r"add_chat\((.+?)\)", query.data)
+    query: CallbackQuery = update.callback_query
+    user: User = update.effective_user
+    match = re.match(r"add_chat(.+?)", query.data)
     if match:
         user_id = match.group(1)
-        chat: Optional[Chat] = update.effective_chat
+        chat: Chat = update.effective_chat
         is_fallen = sql.rem_fallen(chat.id)
         if is_fallen:
             is_fallen = sql.rem_fallen(user_id)
@@ -83,7 +82,6 @@ def fallenadd(update: Update, context: CallbackContext) -> str:
                 ),
                 parse_mode=ParseMode.HTML,
             )
-
     return ""
 
 
@@ -117,8 +115,7 @@ def fallen_message(context: CallbackContext, message):
     elif reply_message:
         if reply_message.from_user.id == BOT_ID:
             return True
-    else:
-        return False
+    return False
 
 
 def chatbot(update: Update, context: CallbackContext):
@@ -133,21 +130,27 @@ def chatbot(update: Update, context: CallbackContext):
         if not fallen_message(context, message):
             return
         bot.send_chat_action(chat_id, action="typing")
-        url = f"https://kora-api.vercel.app/chatbot/2d94e37d-937f-4d28-9196-bd5552cac68b/{BOT_NAME}/Anonymous/message={message.text}"
-        request = requests.get(url)
-        results = json.loads(request.text)
-        sleep(0.5)
-        message.reply_text(results["reply"])
+        try:
+            url = f"https://kora-api.vercel.app/chatbot/2d94e37d-937f-4d28-9196-bd5552cac68b/{BOT_NAME}/Anonymous/message={message.text}"
+            response = requests.get(url)
+            if response.status_code == 200 and response.text:
+                results = response.json()
+                sleep(0.5)
+                message.reply_text(results.get("reply", "I'm not sure how to respond."))
+            else:
+                message.reply_text("Chatbot API se response nahi mila.")
+        except Exception as e:
+            print(f"Chatbot error: {e}")
+            message.reply_text("Chatbot mein error aaya. Thodi der baad try karein.")
 
 
 __help__ = f"""
-*{BOT_NAME} has an chatbot whic provides you a seemingless chatting experience :*
+*{BOT_NAME} has a chatbot which provides you a seamless chatting experience:*
 
  »  /chatbot *:* Shows chatbot control panel
 """
 
 __mod_name__ = "Cʜᴀᴛʙᴏᴛ"
-
 
 CHATBOTK_HANDLER = CommandHandler("chatbot", fallen)
 ADD_CHAT_HANDLER = CallbackQueryHandler(fallenadd, pattern=r"add_chat")
