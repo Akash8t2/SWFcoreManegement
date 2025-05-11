@@ -54,6 +54,7 @@ def fallenrm(update: Update, context: CallbackContext) -> str:
                 ),
                 parse_mode=ParseMode.HTML,
             )
+
     return ""
 
 
@@ -82,6 +83,7 @@ def fallenadd(update: Update, context: CallbackContext) -> str:
                 ),
                 parse_mode=ParseMode.HTML,
             )
+
     return ""
 
 
@@ -115,7 +117,8 @@ def fallen_message(context: CallbackContext, message):
     elif reply_message:
         if reply_message.from_user.id == BOT_ID:
             return True
-    return False
+    else:
+        return False
 
 
 def chatbot(update: Update, context: CallbackContext):
@@ -131,21 +134,18 @@ def chatbot(update: Update, context: CallbackContext):
             return
         bot.send_chat_action(chat_id, action="typing")
         try:
-            url = f"https://kora-api.vercel.app/chatbot/2d94e37d-937f-4d28-9196-bd5552cac68b/{BOT_NAME}/Anonymous/message={message.text}"
+            url = f"https://some-random-api.ml/chatbot?message={message.text}&bot_name={BOT_NAME}&owner=Anonymous"
             response = requests.get(url)
-            if response.status_code == 200 and response.text:
-                results = response.json()
-                sleep(0.5)
-                message.reply_text(results.get("reply", "I'm not sure how to respond."))
-            else:
-                message.reply_text("Chatbot API se response nahi mila.")
+            data = response.json()
+            reply = data.get("response", "I don't know how to respond.")
+            sleep(0.5)
+            message.reply_text(reply)
         except Exception as e:
-            print(f"Chatbot error: {e}")
-            message.reply_text("Chatbot mein error aaya. Thodi der baad try karein.")
+            message.reply_text("Chatbot error: Unable to get response.")
 
 
 __help__ = f"""
-*{BOT_NAME} has a chatbot which provides you a seamless chatting experience:*
+*{BOT_NAME} has an chatbot which provides you a seamless chatting experience :*
 
  »  /chatbot *:* Shows chatbot control panel
 """
