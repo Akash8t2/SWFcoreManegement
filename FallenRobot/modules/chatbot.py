@@ -3,7 +3,7 @@ import re
 import unicodedata
 from time import sleep
 
-import openai
+from openai import OpenAI  # Updated import
 from telegram import (
     CallbackQuery, Chat, InlineKeyboardButton, InlineKeyboardMarkup,
     ParseMode, Update, User, ChatAction
@@ -20,19 +20,15 @@ from FallenRobot.modules.helper_funcs.chat_status import user_admin, user_admin_
 from FallenRobot.modules.log_channel import gloggable
 from FallenRobot.modules.sql import chat_context
 
-# Set your OpenAI API key
+# Initialize OpenAI client
 OPENAI_API_KEY = "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"
-openai.api_key = OPENAI_API_KEY
-
+client = OpenAI(api_key=OPENAI_API_KEY)  # Client initialization
 
 def extract_clean_name(raw_name):
     normalized = unicodedata.normalize('NFKD', raw_name)
     clean = ''.join(ch for ch in normalized if ch.isalnum() or ch.isspace())
     words = clean.split()
-    if words:
-        return words[0].capitalize()
-    return "Unknown"
-
+    return words[0].capitalize() if words else "Unknown"
 
 @run_async
 @user_admin_no_reply
@@ -51,13 +47,11 @@ def fallenrm(update: Update, context: CallbackContext) -> str:
                 f"AI_DISABLED\n"
                 f"<b>Admin :</b> {mention_html(user.id, html.escape(user.first_name))}\n"
             )
-        else:
-            update.effective_message.edit_text(
-                f"{dispatcher.bot.first_name} ᴄʜᴀᴛʙᴏᴛ ᴅɪsᴀʙʟᴇᴅ ʙʏ {mention_html(user.id, user.first_name)}.",
-                parse_mode=ParseMode.HTML,
-            )
+        update.effective_message.edit_text(
+            f"{dispatcher.bot.first_name} ᴄʜᴀᴛʙᴏᴛ ᴅɪsᴀʙʟᴇᴅ ʙʏ {mention_html(user.id, user.first_name)}.",
+            parse_mode=ParseMode.HTML,
+        )
     return ""
-
 
 @run_async
 @user_admin_no_reply
@@ -76,42 +70,33 @@ def fallenadd(update: Update, context: CallbackContext) -> str:
                 f"AI_ENABLED\n"
                 f"<b>Admin :</b> {mention_html(user.id, html.escape(user.first_name))}\n"
             )
-        else:
-            update.effective_message.edit_text(
-                f"{dispatcher.bot.first_name} ᴄʜᴀᴛʙᴏᴛ ᴇɴᴀʙʟᴇᴅ ʙʏ {mention_html(user.id, user.first_name)}.",
-                parse_mode=ParseMode.HTML,
-            )
+        update.effective_message.edit_text(
+            f"{dispatcher.bot.first_name} ᴄʜᴀᴛʙᴏᴛ ᴇɴᴀʙʟᴇᴅ ʙʏ {mention_html(user.id, user.first_name)}.",
+            parse_mode=ParseMode.HTML,
+        )
     return ""
-
 
 @run_async
 @user_admin
 @gloggable
 def fallen(update: Update, context: CallbackContext):
     message = update.effective_message
-    keyboard = InlineKeyboardMarkup([
-        [
-            InlineKeyboardButton("✅ Enable", callback_data=f"add_chat{message.chat_id}"),
-            InlineKeyboardButton("❌ Disable", callback_data=f"rm_chat{message.chat_id}")
-        ]
-    ])
+    keyboard = InlineKeyboardMarkup([[
+        InlineKeyboardButton("✅ Enable", callback_data=f"add_chat{message.chat_id}"),
+        InlineKeyboardButton("❌ Disable", callback_data=f"rm_chat{message.chat_id}")
+    ]])
     message.reply_text(
         "• ᴄʜᴏᴏsᴇ ᴀɴ ᴏᴩᴛɪᴏɴ ᴛᴏ ᴇɴᴀʙʟᴇ/ᴅɪsᴀʙʟᴇ ᴄʜᴀᴛʙᴏᴛ",
         reply_markup=keyboard,
         parse_mode=ParseMode.HTML,
     )
 
-
 def fallen_message(context: CallbackContext, message):
-    reply_message = message.reply_to_message
-    if message.text.lower() == "fallen":
-        return True
-    elif BOT_USERNAME in message.text.upper():
-        return True
-    elif reply_message and reply_message.from_user.id == BOT_ID:
-        return True
-    return False
-
+    return any([
+        message.text.lower() == "fallen",
+        BOT_USERNAME in message.text.upper(),
+        message.reply_to_message and message.reply_to_message.from_user.id == BOT_ID
+    ])
 
 def chatbot(update: Update, context: CallbackContext):
     message = update.effective_message
@@ -138,7 +123,8 @@ def chatbot(update: Update, context: CallbackContext):
         context.bot.send_chat_action(chat_id=chat_id, action=ChatAction.TYPING)
 
         try:
-            response = openai.ChatCompletion.create(
+            # Updated OpenAI API call
+            response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
                     {"role": "system", "content": "You're a friendly Telegram bot assistant."},
@@ -147,7 +133,7 @@ def chatbot(update: Update, context: CallbackContext):
                 max_tokens=200,
                 temperature=0.7,
             )
-            reply = response.choices[0].message["content"]
+            reply = response.choices[0].message.content
             if reply:
                 sleep(0.5)
                 message.reply_text(reply)
@@ -157,12 +143,10 @@ def chatbot(update: Update, context: CallbackContext):
         except Exception as e:
             message.reply_text(f"OpenAI API error: {str(e)}")
 
-
 def reset_chat(update: Update, context: CallbackContext):
     user_id = update.effective_user.id
     chat_context.clear_context(user_id)
     update.message.reply_text("Context reset successfully!")
-
 
 __help__ = f"""
 *{BOT_NAME} has a chatbot powered by OpenAI GPT:*
@@ -177,7 +161,7 @@ CHATBOTK_HANDLER = CommandHandler("chatbot", fallen)
 ADD_CHAT_HANDLER = CallbackQueryHandler(fallenadd, pattern=r"add_chat\d+")
 RM_CHAT_HANDLER = CallbackQueryHandler(fallenrm, pattern=r"rm_chat\d+")
 CHATBOT_HANDLER = MessageHandler(
-    Filters.text & (~Filters.regex(r"^#[^\s]+") & ~Filters.regex(r"^!") & ~Filters.regex(r"^/")),
+    Filters.text & (~Filters.regex(r"^#[^\s]+") & ~Filters.regex(r"^!") & ~Filters.regex(r"^/"),
     chatbot,
 )
 RESET_CONTEXT_HANDLER = CommandHandler("resetchat", reset_chat)
