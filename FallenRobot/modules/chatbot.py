@@ -1,28 +1,16 @@
 import html
-import json
 import re
 import unicodedata
-import string
 from time import sleep
 
-import requests
+import openai
 from telegram import (
-    CallbackQuery,
-    Chat,
-    InlineKeyboardButton,
-    InlineKeyboardMarkup,
-    ParseMode,
-    Update,
-    User,
-    ChatAction,
+    CallbackQuery, Chat, InlineKeyboardButton, InlineKeyboardMarkup,
+    ParseMode, Update, User, ChatAction
 )
 from telegram.ext import (
-    CallbackContext,
-    CallbackQueryHandler,
-    CommandHandler,
-    Filters,
-    MessageHandler,
-    run_async,
+    CallbackContext, CallbackQueryHandler, CommandHandler,
+    Filters, MessageHandler, run_async
 )
 from telegram.utils.helpers import mention_html
 
@@ -30,9 +18,11 @@ import FallenRobot.modules.sql.chatbot_sql as sql
 from FallenRobot import BOT_ID, BOT_NAME, BOT_USERNAME, dispatcher
 from FallenRobot.modules.helper_funcs.chat_status import user_admin, user_admin_no_reply
 from FallenRobot.modules.log_channel import gloggable
+from FallenRobot.modules.sql import chat_context
 
-GEMINI_API_KEY = "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"
-GEMINI_API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_API_KEY}"
+# Set your OpenAI API key
+OPENAI_API_KEY = "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"
+openai.api_key = OPENAI_API_KEY
 
 
 def extract_clean_name(raw_name):
@@ -99,14 +89,14 @@ def fallenadd(update: Update, context: CallbackContext) -> str:
 @gloggable
 def fallen(update: Update, context: CallbackContext):
     message = update.effective_message
-    keyboard = InlineKeyboardMarkup(
-        [[
-            InlineKeyboardButton(text="✅ Enable", callback_data=f"add_chat{message.chat_id}"),
-            InlineKeyboardButton(text="❌ Disable", callback_data=f"rm_chat{message.chat_id}"),
-        ]]
-    )
+    keyboard = InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton("✅ Enable", callback_data=f"add_chat{message.chat_id}"),
+            InlineKeyboardButton("❌ Disable", callback_data=f"rm_chat{message.chat_id}")
+        ]
+    ])
     message.reply_text(
-        text="• ᴄʜᴏᴏsᴇ ᴀɴ ᴏᴩᴛɪᴏɴ ᴛᴏ ᴇɴᴀʙʟᴇ/ᴅɪsᴀʙʟᴇ ᴄʜᴀᴛʙᴏᴛ",
+        "• ᴄʜᴏᴏsᴇ ᴀɴ ᴏᴩᴛɪᴏɴ ᴛᴏ ᴇɴᴀʙʟᴇ/ᴅɪsᴀʙʟᴇ ᴄʜᴀᴛʙᴏᴛ",
         reply_markup=keyboard,
         parse_mode=ParseMode.HTML,
     )
@@ -126,9 +116,9 @@ def fallen_message(context: CallbackContext, message):
 def chatbot(update: Update, context: CallbackContext):
     message = update.effective_message
     chat_id = update.effective_chat.id
-    bot = context.bot
-    is_fallen = sql.is_fallen(chat_id)
-    if is_fallen:
+    user_id = update.effective_user.id
+
+    if sql.is_fallen(chat_id):
         return
 
     if message.text and not message.document:
@@ -141,40 +131,44 @@ def chatbot(update: Update, context: CallbackContext):
         if not fallen_message(context, message):
             return
 
-        bot.send_chat_action(chat_id=chat_id, action=ChatAction.TYPING)
-
         prompt = message.text
-        payload = {
-            "contents": [{"parts": [{"text": prompt}]}]
-        }
+        previous = chat_context.get_context(user_id)
+        full_prompt = f"{previous}\nUser: {prompt}" if previous else prompt
+
+        context.bot.send_chat_action(chat_id=chat_id, action=ChatAction.TYPING)
 
         try:
-            response = requests.post(
-                GEMINI_API_URL,
-                headers={"Content-Type": "application/json"},
-                json=payload,
-                timeout=10
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": "You're a friendly Telegram bot assistant."},
+                    {"role": "user", "content": full_prompt}
+                ],
+                max_tokens=200,
+                temperature=0.7,
             )
-            data = response.json()
-            reply = (
-                data.get("candidates", [{}])[0]
-                    .get("content", {})
-                    .get("parts", [{}])[0]
-                    .get("text")
-            )
+            reply = response.choices[0].message["content"]
             if reply:
                 sleep(0.5)
                 message.reply_text(reply)
+                chat_context.set_context(user_id, f"{full_prompt}\nBot: {reply}")
             else:
-                message.reply_text("No response from Gemini AI.")
-        except Exception:
-            message.reply_text("Chatbot error: Could not connect to Gemini API.")
+                message.reply_text("No response from OpenAI.")
+        except Exception as e:
+            message.reply_text(f"OpenAI API error: {str(e)}")
+
+
+def reset_chat(update: Update, context: CallbackContext):
+    user_id = update.effective_user.id
+    chat_context.clear_context(user_id)
+    update.message.reply_text("Context reset successfully!")
 
 
 __help__ = f"""
-*{BOT_NAME} has a chatbot powered by Gemini AI:*
+*{BOT_NAME} has a chatbot powered by OpenAI GPT:*
 
-» /chatbot : Enable/disable chatbot replies in group.
+» /chatbot : Enable/disable chatbot replies in group.  
+» /resetchat : Reset your chat memory.
 """
 
 __mod_name__ = "Cʜᴀᴛʙᴏᴛ"
@@ -186,15 +180,18 @@ CHATBOT_HANDLER = MessageHandler(
     Filters.text & (~Filters.regex(r"^#[^\s]+") & ~Filters.regex(r"^!") & ~Filters.regex(r"^/")),
     chatbot,
 )
+RESET_CONTEXT_HANDLER = CommandHandler("resetchat", reset_chat)
 
 dispatcher.add_handler(ADD_CHAT_HANDLER)
 dispatcher.add_handler(CHATBOTK_HANDLER)
 dispatcher.add_handler(RM_CHAT_HANDLER)
 dispatcher.add_handler(CHATBOT_HANDLER)
+dispatcher.add_handler(RESET_CONTEXT_HANDLER)
 
 __handlers__ = [
     ADD_CHAT_HANDLER,
     CHATBOTK_HANDLER,
     RM_CHAT_HANDLER,
     CHATBOT_HANDLER,
+    RESET_CONTEXT_HANDLER,
 ]
