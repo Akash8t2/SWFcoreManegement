@@ -161,7 +161,7 @@ CHATBOTK_HANDLER = CommandHandler("chatbot", fallen)
 ADD_CHAT_HANDLER = CallbackQueryHandler(fallenadd, pattern=r"add_chat\d+")
 RM_CHAT_HANDLER = CallbackQueryHandler(fallenrm, pattern=r"rm_chat\d+")
 CHATBOT_HANDLER = MessageHandler(
-    Filters.text & (~Filters.regex(r"^#[^\s]+") & ~Filters.regex(r"^!") & ~Filters.regex(r"^/"),
+    Filters.text & (~Filters.regex(r"^#[^\s]+") & ~Filters.regex(r"^!") & ~Filters.regex(r"^/")),
     chatbot,
 )
 RESET_CONTEXT_HANDLER = CommandHandler("resetchat", reset_chat)
