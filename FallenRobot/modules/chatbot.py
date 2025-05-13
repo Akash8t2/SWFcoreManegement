@@ -21,7 +21,7 @@ from FallenRobot.modules.log_channel import gloggable
 from FallenRobot.modules.sql import chat_context
 
 # Initialize OpenAI client
-OPENAI_API_KEY = "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"
+OPENAI_API_KEY = "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"
 client = OpenAI(api_key=OPENAI_API_KEY)  # Client initialization
 
 def extract_clean_name(raw_name):
