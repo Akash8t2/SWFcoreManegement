@@ -31,7 +31,7 @@ from FallenRobot import BOT_ID, BOT_NAME, BOT_USERNAME, dispatcher
 from FallenRobot.modules.helper_funcs.chat_status import user_admin, user_admin_no_reply
 from FallenRobot.modules.log_channel import gloggable
 
-GEMINI_API_KEY = "AIzaSyBm1Sy9DHcKQ0-hyUn6ues100vrxPWHoGE"
+GEMINI_API_KEY = "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"
 GEMINI_API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_API_KEY}"
 
 
