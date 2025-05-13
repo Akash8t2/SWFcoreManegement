@@ -25,6 +25,11 @@
          "required": true,
          "value": ""
       },
+         "GEMINI_API_KEY": {
+         "description": "आपकी_API_कुंजी.",
+         "required": true,
+         "value": ""
+      },
       "API_HASH": {
          "description": "Get this value from my.telegram.org/apps.",
          "required": true,
